@@ -1,0 +1,181 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f5f5f5;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.header h1 {
+    color: #333;
+    font-size: 28px;
+}
+
+.header p {
+    color: #666;
+    font-size: 16px;
+}
+
+.main-content {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.request-form {
+    width: 100%;
+}
+
+.input-group {
+    margin-bottom: 20px;
+}
+
+.google-label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 14px;
+    color: #5f6368;
+    font-weight: 500;
+}
+
+.google-input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid #dadce0;
+    border-radius: 4px;
+    font-size: 16px;
+    font-family: 'Roboto', Arial, sans-serif;
+    box-sizing: border-box;
+    transition: border 0.3s;
+}
+
+.google-input:focus {
+    border: 1px solid #1a73e8;
+    outline: none;
+}
+
+
+
+.add-row {
+    background-color: #1a73e8;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.add-row:hover {
+    background-color: #1765cc;
+}
+
+.delete-row {
+    background-color: #ea4335;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.delete-row:hover {
+    background-color: #d33426;
+}
+
+.submit-button {
+    background-color: #1a73e8;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.submit-button:hover {
+    background-color: #1765cc;
+}
+
+.footer {
+    text-align: center;
+    margin-top: 30px;
+    color: #666;
+    font-size: 14px;
+}
+
+/* 엑셀 스타일 테이블 */
+.column-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    font-family: Arial, sans-serif;
+}
+
+.column-table th,
+.column-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+.column-table th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+    color: #333;
+}
+
+.column-table td {
+    background-color: #fff;
+}
+
+.column-table tr:hover td {
+    background-color: #f5f5f5;
+}
+
+.column-table input,
+.column-table select {
+    width: 100%;
+    padding: 6px;
+    border: 1px solid #ddd;
+    border-radius: 0;
+    box-sizing: border-box;
+    font-family: inherit;
+}
+
+.column-table input:focus,
+.column-table select:focus {
+    border: 1px solid #1a73e8;
+    outline: none;
+}
+
+/* 삭제 버튼 스타일 */
+.delete-row-btn {
+    background-color: #f44336;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.delete-row-btn:hover {
+    background-color: #d32f2f;
+}
