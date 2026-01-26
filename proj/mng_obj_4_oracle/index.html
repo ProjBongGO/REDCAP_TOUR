@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsuites@5/dist/jsuites.min.css" type="text/css" />
     <script src="https://cdn.jsdelivr.net/npm/jspreadsheet-ce@5/dist/index.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jspreadsheet-ce@5/dist/jspreadsheet.min.css" type="text/css" />
+    <script src="get_table_info.js" defer></script>
 </head>
 <body>
     <div class="container">
@@ -26,71 +27,6 @@
                 <div id="table-grid"></div>
                 <button type="button" class="add-row" id="add-column" style="margin-top:10px;">칼럼정보추가</button>
                 <button type="submit" class="submit-button">제출</button>
-
-                <script>
-                    // 스프레드시트 인스턴스 생성
-                    const spreadsheet = jspreadsheet(document.getElementById('table-grid'), {
-                        worksheets: [{
-                            minDimensions: [9, 1], // 삭제 컬럼 포함 9개
-                            columns: [
-                                { type: 'text', title: 'SCHEMA', width: '100px' },
-                                { type: 'text', title: 'TABLE_NAME', width: '150px' },
-                                { type: 'text', title: 'COLUMN_NAME', width: '150px' },
-                                {
-                                    type: 'dropdown',
-                                    title: 'DATA_TYPE',
-                                    width: '120px',
-                                    source: ['VARCHAR2', 'NUMBER', 'DATE', 'CHAR', 'TIMESTAMP', 'CLOB', 'BLOB']
-                                },
-                                { type: 'text', title: 'DATA_LENGTH', width: '80px' },
-                                {
-                                    type: 'dropdown',
-                                    title: 'NULL',
-                                    width: '60px',
-                                    source: ['Y', 'N']
-                                },
-                                { type: 'text', title: 'DEFAULT', width: '100px' },
-                                { type: 'text', title: 'COMMENT', width: '200px' },
-                                {
-                                    type: 'text',
-                                    title: '삭제',
-                                    width: '80px',
-                                    readOnly: true, // 버튼이 있는 셀은 직접 수정 불가
-                                    render: function(cell, value, x, y, worksheet) {
-                                        cell.innerHTML = '<button type="button" class="delete-row-btn">삭제</button>';
-                                    }
-                                }
-                            ]
-                        }]
-                    });
-
-                    // 행 추가 버튼
-                    document.getElementById('add-column').addEventListener('click', function() {
-                        spreadsheet[0].insertRow();
-                    });
-
-                    // 행 삭제 버튼 이벤트 (수정된 로직)
-                    document.getElementById('table-grid').addEventListener('click', function(event) {
-                        if (event.target.classList.contains('delete-row-btn')) {
-                            // 클릭된 버튼에서 가장 가까운 TD 요소를 찾습니다.
-                            const td = event.target.closest('td');
-                            // Jspreadsheet v5의 행 인덱스는 부모 TR의 attribute에 저장되어 있습니다.
-                            const tr = td.parentElement;
-
-                            // 실제 데이터 상의 인덱스(y좌표)를 가져옵니다.
-                            const rowIndex = parseInt(tr.getAttribute('data-y'));
-
-                            if (!isNaN(rowIndex)) {
-                                if (confirm((rowIndex + 1) + "번 행을 삭제하시겠습니까?")) {
-                                    spreadsheet[0].deleteRow(rowIndex, 1);
-                                }
-                            }
-
-                            event.preventDefault();
-                            event.stopPropagation();
-                        }
-                    });
-                </script>
             </form>
         </main>
         <footer class="footer">
