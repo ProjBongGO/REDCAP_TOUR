@@ -5,31 +5,49 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>테이블 생성 요청</title>
     <link rel="stylesheet" href="styles.css">
-    <script src="https://cdn.jsdelivr.net/npm/jsuites@5/dist/jsuites.min.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsuites@5/dist/jsuites.min.css" type="text/css" />
-    <script src="https://cdn.jsdelivr.net/npm/jspreadsheet-ce@5/dist/index.min.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jspreadsheet-ce@5/dist/jspreadsheet.min.css" type="text/css" />
+    <!-- Handsontable CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/handsontable@12.3.0/dist/handsontable.full.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/handsontable@12.3.0/dist/handsontable.full.min.js"></script>
     <script src="get_table_info.js" defer></script>
 </head>
 <body>
+    <!-- container: styles.css -->
     <div class="container">
-        <header class="header">
-            <h1>테이블 생성 요청</h1>
-            <p>테이블 생성 요청을 제출하세요</p>
-        </header>
+        <h1 style="text-align: center;">테이블 생성 요청</h1>
+        <p style="text-align: center;">테이블 생성 요청을 제출하세요</p>
+        <!-- main-content: styles.css -->
         <main class="main-content">
+            <!-- request-form: styles.css -->
             <form class="request-form">
+                <!-- input-group: styles.css -->
                 <div class="input-group">
-                    <label for="request_number" class="google-label">요청번호</label>
-                    <input type="text" id="request_number" name="request_number" class="google-input" placeholder="요청번호 입력">
+                    <!-- request-label: styles.css -->
+                    <label for="request_number" class="request-label">요청번호 (선택)</label>
+                    <!-- request-input: styles.css -->
+                    <input type="text" id="request_number" name="request_number" class="request-input" placeholder="요청번호 입력 (선택)">
                 </div>
                 <h3>테이블 정보</h3>
+                <!-- table-grid: get_table_info.js -->
                 <div id="table-grid"></div>
-                <button type="button" class="add-row" id="add-column" style="margin-top:10px;">칼럼정보추가</button>
-                <button type="submit" class="submit-button">제출</button>
+                <!-- input-group: styles.css -->
+                <div class="input-group" style="display: flex; align-items: center; margin-top: 10px;">
+                    <!-- column-count: get_table_info.js -->
+                    <input type="number" id="column-count" class="request-input" placeholder="추가할 칼럼 수" style="width: 150px; margin-right: 10px;" min="1" value="1">
+                    <!-- add-column-btn: get_table_info.js -->
+                    <button type="button" class="add-column-btn" id="add-column-btn">칼럼정보추가</button>
+                    <!-- generate-btn: get_table_info.js -->
+                    <button type="button" class="generate-button" id="generate-btn" style="margin-left: auto;">SQL GENERATE</button>
+                </div>
             </form>
+            <!-- sql-output: get_table_info.js -->
+            <div id="sql-output" class="sql-output" style="margin-top: 20px; padding: 10px; background-color: #f5f5f5; border: 1px solid #ddd; border-radius: 4px; display: none;">
+                <h3>생성된 SQL</h3>
+                <!-- sql-content: get_table_info.js -->
+                <pre id="sql-content"></pre>
+            </div>
         </main>
-        <footer class="footer">
+        <!-- request-footer: styles.css -->
+        <footer class="request-footer">
             <p>© 2026 테이블 생성 요청 시스템</p>
         </footer>
     </div>

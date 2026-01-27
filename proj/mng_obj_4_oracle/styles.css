@@ -1,3 +1,52 @@
+/* 전역 헤더 스타일 */
+h1 {
+    color: #333;
+    font-size: 28px;
+    margin: 0 0 10px 0;
+    padding: 0;
+    font-weight: bold;
+}
+
+h2 {
+    color: #333;
+    font-size: 24px;
+    margin: 0 0 10px 0;
+    padding: 0;
+    font-weight: bold;
+}
+
+h3 {
+    color: #333;
+    font-size: 20px;
+    margin: 0 0 10px 0;
+    padding: 0;
+    font-weight: bold;
+}
+
+h4 {
+    color: #333;
+    font-size: 18px;
+    margin: 0 0 10px 0;
+    padding: 0;
+    font-weight: bold;
+}
+
+h5 {
+    color: #333;
+    font-size: 16px;
+    margin: 0 0 10px 0;
+    padding: 0;
+    font-weight: bold;
+}
+
+h6 {
+    color: #333;
+    font-size: 14px;
+    margin: 0 0 10px 0;
+    padding: 0;
+    font-weight: bold;
+}
+
 body {
     font-family: Arial, sans-serif;
     margin: 0;
@@ -6,24 +55,21 @@ body {
 }
 
 .container {
-    max-width: 800px;
+    max-width: 1000px;
     margin: 0 auto;
     padding: 20px;
 }
 
-.header {
+.request-header {
     text-align: center;
     margin-bottom: 30px;
 }
 
-.header h1 {
-    color: #333;
-    font-size: 28px;
-}
-
-.header p {
+.request-header p {
     color: #666;
     font-size: 16px;
+    margin: 0;
+    padding: 0;
 }
 
 .main-content {
@@ -41,7 +87,7 @@ body {
     margin-bottom: 20px;
 }
 
-.google-label {
+.request-label {
     display: block;
     margin-bottom: 8px;
     font-size: 14px;
@@ -49,7 +95,7 @@ body {
     font-weight: 500;
 }
 
-.google-input {
+.request-input {
     width: 100%;
     padding: 12px 16px;
     border: 1px solid #dadce0;
@@ -60,14 +106,12 @@ body {
     transition: border 0.3s;
 }
 
-.google-input:focus {
+.request-input:focus {
     border: 1px solid #1a73e8;
     outline: none;
 }
 
-
-
-.add-row {
+.add-column-btn {
     background-color: #1a73e8;
     color: white;
     border: none;
@@ -79,26 +123,12 @@ body {
     transition: background-color 0.3s;
 }
 
-.add-row:hover {
+.add-column-btn:hover {
     background-color: #1765cc;
 }
 
-.delete-row {
-    background-color: #ea4335;
-    color: white;
-    border: none;
-    padding: 6px 12px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 12px;
-}
-
-.delete-row:hover {
-    background-color: #d33426;
-}
-
-.submit-button {
-    background-color: #1a73e8;
+.generate-button {
+    background-color: #4caf50;
     color: white;
     border: none;
     padding: 12px 24px;
@@ -109,11 +139,11 @@ body {
     transition: background-color 0.3s;
 }
 
-.submit-button:hover {
-    background-color: #1765cc;
+.generate-button:hover {
+    background-color: #45a049;
 }
 
-.footer {
+.request-footer {
     text-align: center;
     margin-top: 30px;
     color: #666;
@@ -165,17 +195,3 @@ body {
     outline: none;
 }
 
-/* 삭제 버튼 스타일 */
-.delete-row-btn {
-    background-color: #f44336;
-    color: white;
-    border: none;
-    padding: 5px 10px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 12px;
-}
-
-.delete-row-btn:hover {
-    background-color: #d32f2f;
-}
