@@ -99,7 +99,7 @@ autoFitColumn(ws, 1);
 function autoFitAllColumns(worksheet) {
     // 데이터의 열 개수만큼 반복
     let colCount = worksheet.options.columns.length || worksheet.getData()[0].length;
-    for (let i = 0; i < colCount; i++) {
+    for (let i = 0; i < colCreount; i++) {
         autoFitColumn(worksheet, i);
     }
 }

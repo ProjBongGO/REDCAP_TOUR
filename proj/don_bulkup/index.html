@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <title>삼성전자 종가 조회</title>
+</head>
+<body>
+    <h2>삼성전자 전일 종가 조회</h2>
+    <button id="btnFetch">종가 조회</button>
+    <p id="result"></p>
+
+    <script>
+        async function fetchSamsungClosePrice() {
+            const token = JSON.parse(document.getElementById('result').textContent).token; // get_token.html \uac80\uc99d\ub41c \ucd1d\ub300
+            const url = 'https://api.kiwoom.com/api/dostk/stkinfo';
+            const data = { stk_cd: '005930' };
+            const headers = {
+                'Content-Type': 'application/json;charset=UTF-8',
+                'authorization': `Bearer ${token}`,
+                'cont-yn': 'N',
+                'next-key': '',
+                'api-id': 'ka10100'
+            };
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: headers,
+                    body: JSON.stringify(data)
+                });
+
+                if (!response.ok) {
+                    document.getElementById('result').textContent = `오류 발생: ${response.status}`;
+                    return;
+                }
+
+                const json = await response.json();
+                if (json.return_code === 0) {
+                    const price = json.lastPrice;
+                    document.getElementById('result').textContent = `삼성전자 전일 종가: ${parseInt(price, 10).toLocaleString()} 원`;
+                } else {
+                    document.getElementById('result').textContent = `API 오류: ${json.return_msg}`;
+                }
+            } catch (error) {
+                document.getElementById('result').textContent = `요청 실패: ${error.message}`;
+            }
+        }
+
+        document.getElementById('btnFetch').addEventListener('click', fetchSamsungClosePrice);
+    </script>
+</body>
+</html>
