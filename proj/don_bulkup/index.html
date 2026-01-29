@@ -1,52 +1,132 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8" />
-    <title>삼성전자 종가 조회</title>
+    <meta charset="UTF-8">
+    <title>주식 종가 조회</title>
+    <style>
+        #container { display: flex; }
+        #stockArea { width: 45%; padding: 10px; box-sizing: border-box; }
+        #priceArea { width: 55%; padding: 10px; box-sizing: border-box; text-align: center; }
+        #stockList { list-style: none; padding: 0; }
+        #stockList li { margin: 5px 0; cursor: pointer; padding: 5px; background: #f0f0f0; border-radius: 3px; }
+        #stockList li:hover { background: #d0d0d0; }
+    </style>
 </head>
 <body>
-    <h2>삼성전자 전일 종가 조회</h2>
-    <button id="btnFetch">종가 조회</button>
-    <p id="result"></p>
+    <h2>주식 종가 조회</h2>
+    <div id="container">
+        <div id="stockArea">
+            <select id="marketSelect">
+                <option value="KOSPI">KOSPI</option>
+                <option value="KOSDAQ">KOSDAQ</option>
+            </select>
+            <ul id="stockList"></ul>
+        </div>
+        <div id="priceArea">
+            <p>종가: --</p>
+        </div>
+    </div>
 
     <script>
-        async function fetchSamsungClosePrice() {
-            const token = JSON.parse(document.getElementById('result').textContent).token; // get_token.html \uac80\uc99d\ub41c \ucd1d\ub300
-            const url = 'https://api.kiwoom.com/api/dostk/stkinfo';
-            const data = { stk_cd: '005930' };
-            const headers = {
-                'Content-Type': 'application/json;charset=UTF-8',
-                'authorization': `Bearer ${token}`,
-                'cont-yn': 'N',
-                'next-key': '',
-                'api-id': 'ka10100'
-            };
-
-            try {
-                const response = await fetch(url, {
+        (async function() {
+            // Ensure token is available
+            async function getToken() {
+                const url = 'https://api.kiwoom.com/oauth2/token';
+                const data = {
+                    grant_type: 'client_credentials',
+                    appkey: 'YOUR_APPKEY',      // 실제 키로 교체
+                    secretkey: 'YOUR_SECRETKEY' // 실제 키로 교체
+                };
+                const resp = await fetch(url, {
                     method: 'POST',
-                    headers: headers,
+                    headers: { 'Content-Type': 'application/json;charset=UTF-8' },
                     body: JSON.stringify(data)
                 });
-
-                if (!response.ok) {
-                    document.getElementById('result').textContent = `오류 발생: ${response.status}`;
-                    return;
+                if (!resp.ok) throw new Error('토큰 발급 실패: ' + resp.status);
+                const json = await resp.json();
+                if (!json.token) throw new Error('토큰이 반환되지 않음');
+                localStorage.setItem('kiwoomToken', json.token);
+                if (json.expires_in) {
+                    const expiry = Date.now() + json.expires_in * 1000;
+                    localStorage.setItem('kiwoomTokenExpiry', expiry);
                 }
-
-                const json = await response.json();
-                if (json.return_code === 0) {
-                    const price = json.lastPrice;
-                    document.getElementById('result').textContent = `삼성전자 전일 종가: ${parseInt(price, 10).toLocaleString()} 원`;
-                } else {
-                    document.getElementById('result').textContent = `API 오류: ${json.return_msg}`;
-                }
-            } catch (error) {
-                document.getElementById('result').textContent = `요청 실패: ${error.message}`;
+                return json.token;
             }
-        }
 
-        document.getElementById('btnFetch').addEventListener('click', fetchSamsungClosePrice);
+            async function ensureToken() {
+                const storedToken = localStorage.getItem('kiwoomToken');
+                const storedExpiry = Number(localStorage.getItem('kiwoomTokenExpiry'));
+                if (!storedToken || (storedExpiry && Date.now() > storedExpiry)) {
+                    return await getToken();
+                }
+                return storedToken;
+            }
+
+            const stocks = {
+                KOSPI: [
+                    {code: '005930', name: '삼성전자'},
+                    {code: '000660', name: 'SK하이닉스'},
+                    {code: '035720', name: '네이버'}
+                ],
+                KOSDAQ: [
+                    {code: '066570', name: '바이오니아'},
+                    {code: '032190', name: '에스엠코'},
+                    {code: '023530', name: '디자인하이'}
+                ]
+            };
+
+            async function fetchPrice(stk_cd) {
+                const token = await ensureToken();
+                const url = 'https://api.kiwoom.com/api/dostk/stkinfo';
+                const data = { stk_cd: stk_cd };
+                const headers = {
+                    'Content-Type': 'application/json;charset=UTF-8',
+                    'authorization': `Bearer ${token}`,
+                    'cont-yn': 'N',
+                    'next-key': '',
+                    'api-id': 'ka10100'
+                };
+                const resp = await fetch(url, {
+                    method: 'POST',
+                    headers,
+                    body: JSON.stringify(data)
+                });
+                if (!resp.ok) throw new Error('API 오류: ' + resp.status);
+                const json = await resp.json();
+                if (json.return_code !== 0) throw new Error(json.return_msg);
+                return json.lastPrice;
+            }
+
+            // UI setup
+            const marketSelect = document.getElementById('marketSelect');
+            const stockList = document.getElementById('stockList');
+            const priceArea = document.getElementById('priceArea');
+
+            marketSelect.addEventListener('change', async function() {
+                const market = marketSelect.value;
+                // Clear previous list
+                stockList.innerHTML = '';
+                // Populate with stocks for selected market
+                const list = stocks[market];
+                list.forEach(stock => {
+                    const li = document.createElement('li');
+                    li.textContent = `${stock.name} (` + stock.code + `)`;
+                    li.addEventListener('click', async function() {
+                        try {
+                            const price = await fetchPrice(stock.code);
+                            priceArea.innerHTML = `<p>종가: ${parseInt(price,10).toLocaleString()} 원</p>`;
+                        } catch (e) {
+                            priceArea.innerHTML = `<p>가격 조회 실패: ${e.message}</p>`;
+                        }
+                    });
+                    stockList.appendChild(li);
+                });
+            });
+
+            // Initial load: set default market to KOSPI and load its stocks
+            marketSelect.value = 'KOSPI';
+            marketSelect.dispatchEvent(new Event('change'));
+        })();
     </script>
 </body>
 </html>
