@@ -20,48 +20,191 @@ document.addEventListener('DOMContentLoaded', function() {
         colHeaders: [
             'SCHEMA',        // index 0
             'TABLE_NAME',    // index 1
-            'TABLE_COMMENT', // index 2 - 새로 추가
-            'COLUMN_NAME',   // index 3
-            'DATA_TYPE',     // index 4
-            'DATA_LENGTH',   // index 5
-            'NULL',          // index 6
-            'DEFAULT',       // index 7
-            'COLUMN_COMMENT' // index 8
+            'TABLE_COMMENT', // index 2
+            'PK순번',        // index 3 - 새로 추가
+            'COLUMN_NAME',   // index 4
+            'COLUMN_COMMENT',// index 5
+            'DATA_TYPE',     // index 6
+            'DATA_LENGTH',   // index 7
+            'NULL',          // index 8
+            'DEFAULT'        // index 9
         ],
         columns: [
-            { // SCHEMA
+            { // SCHEMA (index 0)
                 type: 'autocomplete',
                 source: ['RTIS', 'OBT', 'ERPAPP'],
                 strict: true,
-                allowInvalid: false
+                allowInvalid: false,
+                validator: function(value, callback) {
+                    // 스키마 유효성 검증
+                    const validSchemas = ['RTIS', 'OBT', 'ERPAPP'];
+                    const isValid = !value || validSchemas.includes(value.toUpperCase());
+                    callback(isValid);
+                }
             },
-            { type: 'text' }, // TABLE_NAME
-            { type: 'text' }, // TABLE_COMMENT - 추가된 컬럼
-            { type: 'text' }, // COLUMN_NAME
-            { // DATA_TYPE
+            { // TABLE_NAME (index 1)
+                type: 'text',
+                validator: function(value, callback) {
+                    // 테이블 이름 유효성 검증
+                    if (!value || value.trim() === '') {
+                        callback(false);
+                        return;
+                    }
+                    const isValid = /^[A-Za-z0-9_]{1,30}$/.test(value);
+                    callback(isValid);
+                }
+            },
+            { // TABLE_COMMENT (index 2)
+                type: 'text',
+                validator: function(value, callback) {
+                    // 테이블 주석 유효성 검증
+                    const isValid = !value || value.length <= 4000;
+                    callback(isValid);
+                }
+            },
+            { // PK순번 (index 3)
+                type: 'numeric',
+                validator: function(value, callback) {
+                    if (value === null || value === '') {
+                        callback(true);
+                        return;
+                    }
+
+                    // 숫자 여부 확인
+                    if (isNaN(value) || value <= 0 || value > 32) {
+                        callback(false);
+                        return;
+                    }
+
+                    // 중복 확인
+                    const hotInstance = this.instance;
+                    const data = hotInstance.getDataAtCol(3); // PK순번 열(index 3)
+                    const currentRow = this.row;
+
+                    const isDuplicate = data.some((val, index) => {
+                        return index !== currentRow && val !== null && val !== '' && String(val) === String(value);
+                    });
+
+                    callback(!isDuplicate);
+                }
+            },
+            { // COLUMN_NAME (index 4)
+                type: 'text',
+                validator: function(value, callback) {
+                    // 컬럼 이름 유효성 검증
+                    if (!value || value.trim() === '') {
+                        callback(false);
+                        return;
+                    }
+                    const isValid = /^[A-Za-z][A-Za-z0-9_]{0,29}$/.test(value);
+                    callback(isValid);
+                }
+            },
+            { // COLUMN_COMMENT (index 5)
+                type: 'text',
+                validator: function(value, callback) {
+                    // 컬럼 주석 유효성 검증
+                    const isValid = !value || value.length <= 4000;
+                    callback(isValid);
+                }
+            },
+            { // DATA_TYPE (index 6)
                 type: 'autocomplete',
                 source: ['VARCHAR2', 'NUMBER', 'DATE', 'CHAR', 'TIMESTAMP', 'CLOB', 'BLOB'],
                 strict: true,
-                allowInvalid: false
-            },
-            { // DATA_LENGTH
-                type: 'text',
+                allowInvalid: false,
                 validator: function(value, callback) {
-                    if (!value || /^[0-9]+$/.test(value)) { // 숫자만 허용
-                        callback(true);
-                    } else {
-                        callback(false);
-                    }
+                    // 데이터 타입 유효성 검증
+                    const validTypes = ['VARCHAR2', 'NUMBER', 'DATE', 'CHAR', 'TIMESTAMP', 'CLOB', 'BLOB'];
+                    const isValid = value && validTypes.includes(value.toUpperCase());
+                    callback(isValid);
                 }
             },
-            { // NULL
+            { // DATA_LENGTH (index 7)
+                type: 'text',
+                validator: function(value, callback) {
+                    // 데이터 길이 유효성 검증
+                    if (!value || value.trim() === '') {
+                        callback(true);
+                        return;
+                    }
+
+                    const num = parseInt(value);
+                    if (isNaN(num) || num <= 0) {
+                        callback(false);
+                        return;
+                    }
+
+                    // 현재 행의 데이터 타입 확인
+                    const hotInstance = this.instance;
+                    const dataType = hotInstance.getDataAtCell(this.row, 6); // DATA_TYPE 열(index 6)
+
+                    // 데이터 타입에 따른 길이 제한
+                    if (dataType) {
+                        const dataTypeUpper = dataType.toUpperCase();
+                        switch (dataTypeUpper) {
+                            case 'VARCHAR2':
+                                callback(num <= 4000);
+                                return;
+                            case 'CHAR':
+                                callback(num <= 2000);
+                                return;
+                            case 'NUMBER':
+                                callback(num <= 38);
+                                return;
+                            default:
+                                callback(true); // DATE, TIMESTAMP 등은 길이 무시
+                                return;
+                        }
+                    }
+
+                    callback(true);
+                }
+            },
+            { // NULL (index 8)
                 type: 'autocomplete',
                 source: ['Y', 'N'],
                 strict: true,
-                allowInvalid: false
+                allowInvalid: false,
+                validator: function(value, callback) {
+                    // NULL 허용 여부 유효성 검증
+                    const isValid = value && ['Y', 'N'].includes(value.toUpperCase());
+                    callback(isValid);
+                }
             },
-            { type: 'text' }, // DEFAULT
-            { type: 'text' }  // COLUMN_COMMENT
+            { // DEFAULT (index 9)
+                type: 'text',
+                validator: function(value, callback) {
+                    // 기본값 유효성 검증
+                    if (!value || value.trim() === '') {
+                        callback(true);
+                        return;
+                    }
+
+                    // 현재 행의 데이터 타입 확인
+                    const hotInstance = this.instance;
+                    const dataType = hotInstance.getDataAtCell(this.row, 6); // DATA_TYPE 열(index 6)
+
+                    if (dataType) {
+                        const dataTypeUpper = dataType.toUpperCase();
+                        if (dataTypeUpper === 'NUMBER') {
+                            // NUMBER 타입은 숫자만 허용
+                            const isValid = /^-?\d+(\.\d+)?$/.test(value.trim()) || value.trim().toUpperCase() === 'NULL';
+                            callback(isValid);
+                            return;
+                        } else if (dataTypeUpper === 'DATE') {
+                            // DATE 타입은 따옴표로 감싸거나 TO_DATE 함수만 허용
+                            const isValid = /^'.*'$/.test(value) || /TO_DATE\(/i.test(value);
+                            callback(isValid);
+                            return;
+                        }
+                    }
+
+                    // 문자열 타입은 따옴표로 감싸면 유효
+                    const isValid = /^'.*'$/.test(value);
+                    callback(isValid);
+                }
+            }
         ],
         minSpareRows: 1,
         contextMenu: true,
@@ -97,83 +240,33 @@ document.addEventListener('DOMContentLoaded', function() {
         const data = hot.getData();
         const requestNumber = document.getElementById('request_number').value;
 
-        // ...existing code for initial checks...
-
-        // 테이블 이름 추출 (첫 번째 유효한 행에서)
-        // RequestNumber가 존재하면 RequestNumber를 사용, 아니면 Handsontable의 첫 번째 유효한 행에서 TABLE_NAME을 가져옴
-        // 둘 다 없으면 'NEW_TABLE'
-        const extractedTableName = data.find(row => row[1]) ? data.find(row => row[1])[1] : '';
-        const tableName = (requestNumber || extractedTableName || 'NEW_TABLE').toUpperCase();
-
-        // 테이블 주석 추출 (첫 번째 유효한 행에서)
-        const tableComment = data.find(row => row[2]) ? data.find(row => row[2])[2] : '';
-
-        let sql = `CREATE TABLE ${tableName} (\n`;
-        let comments = []; // Oracle COMMENT 문을 저장할 배열
-
-        // 유효한 컬럼만 추출 (COLUMN_NAME이 비어 있지 않은 행)
-        const validColumns = data.filter(row => {
-            // 빈 행이 아니고, COLUMN_NAME (index 3)이 있는 경우
-            return row.every(cell => cell === '') === false && row[3];
-        });
-
-        validColumns.forEach((row, index) => {
-            // 스키마는 첫 번째 유효한 행에서 가져오거나, 모든 행의 스키마가 동일하다고 가정 (여기서는 첫 번째 행 기준)
-            const schema = row[0] || ''; // 스키마는 각 컬럼 정의에 사용되지 않으므로, 이 시점에서 불필요할 수 있음
-            // const currentTableName = row[1] ? row[1].toUpperCase() : ''; // 이 변수는 이제 사용하지 않음
-            // const currentTableComment = row[2] || ''; // 이 변수도 이제 사용하지 않음
-
-            const columnName = row[3] ? row[3].toUpperCase() : ''; // COLUMN_NAME (index 3)
-            const dataType = row[4] ? row[4].toUpperCase() : '';    // DATA_TYPE (index 4)
-            const dataLength = row[5] || '';                        // DATA_LENGTH (index 5)
-            const nullable = row[6] === 'Y' ? 'NULL' : 'NOT NULL';  // NULL (index 6)
-            const defaultValue = row[7] || '';                      // DEFAULT (index 7)
-            const columnComment = row[8] || '';                     // COLUMN_COMMENT (index 8)
-
-            // 컬럼 이름이 비어 있는 경우 건너뛰기 (validColumns 필터링에서 이미 처리됨)
-            // if (!columnName) return;
-
-            let columnDef = `    "${columnName}" ${dataType}`; // Oracle에서는 대소문자 구분을 위해 컬럼명에 쌍따옴표 권장
-            if (dataLength) {
-                columnDef += `(${dataLength})`;
-            }
-            columnDef += ` ${nullable}`;
-            if (defaultValue) {
-                // DEFAULT 값이 숫자가 아닌 경우 따옴표 처리
-                if (!/^(\d+(\.\d+)?|TO_DATE\\(.+\\))$/.test(defaultValue.trim())) { // 숫자나 TO_DATE 함수가 아니면 따옴표
-                    columnDef += ` DEFAULT '${defaultValue}'`;
-                } else {
-                    columnDef += ` DEFAULT ${defaultValue}`;
-                }
-            }
-
-            sql += columnDef;
-
-            // Oracle COLUMN COMMENT 문 생성
-            if (columnComment) {
-                comments.push(`COMMENT ON COLUMN "${tableName}"."${columnName}" IS '${columnComment}';`);
-            }
-
-            // 마지막 유효한 컬럼이 아닌 경우에만 콤마 추가
-            if (index < validColumns.length - 1) {
-                sql += ',\n';
-            }
-        });
-
-        sql += '\n);';
-
-        // Oracle TABLE COMMENT 문 추가 (테이블 주석이 있는 경우에만)
-        if (tableComment) {
-            sql += `\n\nCOMMENT ON TABLE "${tableName}" IS '${tableComment}';`;
+        // 모든 행이 비어 있는지 확인
+        const isAllRowsEmpty = data.every(row => row.every(cell => cell === '' || cell === null));
+        if (isAllRowsEmpty) {
+            alert('테이블 정보가 비어 있습니다. 최소한 하나의 컬럼을 정의해주세요.');
+            sqlOutput.style.display = 'none';
+            return;
         }
 
-        // Oracle COLUMN COMMENT 문 추가
-        if (comments.length > 0) {
-            sql += '\n\n' + comments.join('\n');
+        // 최소한 하나의 COLUMN_NAME이 있는지 확인 (index 4)
+        const hasColumnName = data.some(row => row[4] && row[4].trim() !== '');
+        if (!hasColumnName) {
+            alert('컬럼명이 비어있는 행이 있습니다. 최소한 하나의 유효한 컬럼명을 입력해주세요.');
+            sqlOutput.style.display = 'none';
+            return;
         }
 
-        sqlContent.textContent = sql;
-        sqlOutput.style.display = 'block';
+        try {
+            // create_sql.js의 generateOracleSQL 함수를 사용하여 SQL 생성
+            const sql = generateOracleSQL(data, requestNumber);
+
+            // SQL 출력 영역 초기화 및 새로 고침
+            sqlContent.textContent = ''; // 기존 SQL 내용 완전히 초기화
+            sqlContent.textContent = sql; // 새로운 SQL로 교체
+            sqlOutput.style.display = 'block'; // 출력 영역 표시 (수정됨)
+        } catch (error) {
+            console.error('SQL 생성 중 오류 발생:', error);
+            alert('SQL 생성 중 오류가 발생했습니다. 콘솔을 확인해주세요.');
+        }
     });
-
 });
