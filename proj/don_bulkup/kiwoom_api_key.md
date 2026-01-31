@@ -1,2 +1,0 @@
-appkey : ul7TVjxFQIUKaHxcZeF-xiTEdBxNBM5dr_QhKeDN6Y4
-secretkey : 3MXD0B1WgiZGA8AzDF5uNTSp5pm7VGwigBv8SU4Ztyc
