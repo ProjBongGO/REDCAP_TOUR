@@ -1,0 +1,12 @@
+-- 데이터베이스 생성
+CREATE DATABASE don_bulkup;
+
+-- 사용자 생성
+CREATE USER kbs WITH PASSWORD 'kbs123!';
+
+-- 권한 부여
+GRANT ALL PRIVILEGES ON DATABASE don_bulkup TO KOS;
+
+-- 스키마 생성
+CREATE SCHEMA kr AUTHORIZATION kbs;
+CREATE SCHEMA us AUTHORIZATION kbs;
